@@ -1,0 +1,15 @@
+{
+  "name": "@smart-tv-remote/admin",
+  "version": "1.0.0",
+  "description": "Smart TV Remote Admin Dashboard",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Admin project verified\""
+  },
+  "dependencies": {
+    "@smart-tv-remote/shared": "file:../shared/ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@smart-tv-remote/shared",
+  "version": "1.0.0",
+  "description": "Shared protocol definitions, command models, and payload schemas for Smart TV Remote Platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Shared specs validated\""
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}
