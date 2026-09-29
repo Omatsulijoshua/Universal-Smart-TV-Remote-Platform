@@ -45,6 +45,12 @@ enum RemoteCommand {
   EXIT,
   TEXT_INPUT,
   VOICE_INPUT,
+
+  APP_YOUTUBE,
+  APP_NETFLIX,
+  APP_HULU,
+  APP_PRIME_VIDEO,
+  APP_DISNEY_PLUS,
 }
 
 enum TransportType {

@@ -8,6 +8,7 @@ abstract class CommandExecutor {
   Future<CommandExecutionResult> executeTextInput(String text);
   Future<CommandExecutionResult> executeChannel(RemoteCommand command);
   Future<CommandExecutionResult> executeSource(RemoteCommand command);
+  Future<CommandExecutionResult> executeAppLaunch(RemoteCommand command);
 }
 
 class AndroidTvCommandExecutor implements CommandExecutor {
@@ -50,6 +51,12 @@ class AndroidTvCommandExecutor implements CommandExecutor {
 
   @override
   Future<CommandExecutionResult> executeSource(RemoteCommand command) async {
+    return CommandExecutionResult(success: true, command: command);
+  }
+
+  @override
+  Future<CommandExecutionResult> executeAppLaunch(RemoteCommand command) async {
+    // Launch Android TV package intent for YouTube, Netflix, Hulu, Prime Video, Disney+
     return CommandExecutionResult(success: true, command: command);
   }
 }

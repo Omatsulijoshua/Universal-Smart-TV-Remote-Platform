@@ -126,6 +126,13 @@ class TvCompanionService extends ChangeNotifier {
       case RemoteCommand.TEXT_INPUT:
         result = await executor.executeTextInput(text ?? '');
         break;
+      case RemoteCommand.APP_YOUTUBE:
+      case RemoteCommand.APP_NETFLIX:
+      case RemoteCommand.APP_HULU:
+      case RemoteCommand.APP_PRIME_VIDEO:
+      case RemoteCommand.APP_DISNEY_PLUS:
+        result = await executor.executeAppLaunch(command);
+        break;
       default:
         result = await executor.executeNavigation(command);
         break;

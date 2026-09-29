@@ -5,6 +5,7 @@ import '../state/tv_provider.dart';
 import '../widgets/dpad_widget.dart';
 import '../widgets/volume_control_widget.dart';
 import '../widgets/channel_control_widget.dart';
+import '../widgets/app_shortcuts_widget.dart';
 import '../widgets/keyboard_input_dialog.dart';
 import '../widgets/voice_control_modal.dart';
 import 'settings_screen.dart';
@@ -197,6 +198,10 @@ class _RemoteScreenState extends State<RemoteScreen> {
                   _buildNumericKeypad(),
                   const SizedBox(height: 12),
                 ],
+
+                // App Shortcuts: YouTube, Netflix, Hulu, Prime, Disney+
+                AppShortcutsWidget(onCommand: _onButtonPress),
+                const SizedBox(height: 16),
 
                 // Navigation Bar: HOME, BACK, MENU, GUIDE per Section 13 & 14
                 Row(
