@@ -1,5 +1,9 @@
 import { Module, Controller, Get } from '@nestjs/common';
 import { COMPANION_SERVICE_TYPE, PROTOCOL_VERSION } from '@smart-tv-remote/shared';
+import { BrandsController } from './controllers/brands.controller';
+import { DevicesController } from './controllers/devices.controller';
+import { DiagnosticsController } from './controllers/diagnostics.controller';
+import { AppConfigController } from './controllers/config.controller';
 
 @Controller('health')
 export class HealthController {
@@ -15,29 +19,15 @@ export class HealthController {
   }
 }
 
-@Controller('brands')
-export class BrandsController {
-  @Get()
-  getBrands() {
-    return [
-      {
-        id: 'brand-hikers',
-        name: 'Hikers',
-        status: 'TESTING',
-        notes: 'Target brand. Verified capability fallback via TV companion app.',
-      },
-      {
-        id: 'brand-generic-android',
-        name: 'Generic Android TV',
-        status: 'SUPPORTED',
-      },
-    ];
-  }
-}
-
 @Module({
   imports: [],
-  controllers: [HealthController, BrandsController],
+  controllers: [
+    HealthController,
+    BrandsController,
+    DevicesController,
+    DiagnosticsController,
+    AppConfigController,
+  ],
   providers: [],
 })
 export class AppModule {}
