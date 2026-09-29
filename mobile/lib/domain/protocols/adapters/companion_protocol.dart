@@ -1,8 +1,12 @@
 import 'package:shared/shared.dart';
 import '../tv_protocol.dart';
+import '../../../data/datasources/companion_socket_client.dart';
+import '../../../core/security/secure_storage_service.dart';
 
 class CompanionProtocol implements TvProtocol {
-  bool _connected = false;
+  final CompanionSocketClient _socketClient = CompanionSocketClient();
+  final SecureStorageService _secureStorage = SecureStorageService();
+
   String? _ipAddress;
   int _port = 8888;
   String? _sessionToken;
@@ -20,29 +24,49 @@ class CompanionProtocol implements TvProtocol {
     _ipAddress = ipAddress;
     _port = port;
     _sessionToken = sessionToken;
-    _connected = true;
-    return true;
+
+    final connected = await _socketClient.connect(ipAddress, port);
+    if (connected && sessionToken != null) {
+      await _secureStorage.savePairingToken(ipAddress, sessionToken);
+    }
+    return connected;
+  }
+
+  Future<PairingResponse> pairWithCode(String pairingCode, String phoneName) async {
+    if (!_socketClient.isConnected && _ipAddress != null) {
+      await _socketClient.connect(_ipAddress!, _port);
+    }
+
+    final response = await _socketClient.sendPairingRequest(pairingCode, phoneName);
+    if (response.success && response.sessionToken != null && _ipAddress != null) {
+      _sessionToken = response.sessionToken;
+      await _secureStorage.savePairingToken(_ipAddress!, response.sessionToken!);
+    }
+    return response;
   }
 
   @override
   Future<void> disconnect() async {
-    _connected = false;
+    await _socketClient.disconnect();
   }
 
   @override
   Future<CommandExecutionResult> sendCommand(RemoteCommand command, {String? text}) async {
-    if (!_connected) {
-      return CommandExecutionResult(
-        success: false,
-        command: command,
-        reason: 'NOT_CONNECTED',
-      );
+    if (!_socketClient.isConnected && _ipAddress != null) {
+      final reconnected = await _socketClient.connect(_ipAddress!, _port);
+      if (!reconnected) {
+        return CommandExecutionResult(
+          success: false,
+          command: command,
+          reason: 'CONNECTION_FAILED: Unable to reach TV companion on LAN.',
+        );
+      }
     }
-    // Command execution placeholder - will transmit over socket/HTTP in phase 4/5
-    return CommandExecutionResult(
-      success: true,
-      command: command,
-      latencyMs: 15,
+
+    return await _socketClient.sendCommand(
+      command,
+      text: text,
+      sessionToken: _sessionToken,
     );
   }
 
@@ -60,7 +84,7 @@ class CompanionProtocol implements TvProtocol {
   Future<DiscoveredDevice?> getDeviceInfo() async {
     if (_ipAddress == null) return null;
     return DiscoveredDevice(
-      deviceId: 'tv-companion-placeholder',
+      deviceId: 'tv-companion-active',
       name: 'Smart TV Companion',
       manufacturer: 'Hikers / Generic',
       model: 'Android TV',
@@ -75,5 +99,5 @@ class CompanionProtocol implements TvProtocol {
   }
 
   @override
-  Future<bool> isConnected() async => _connected;
+  Future<bool> isConnected() async => _socketClient.isConnected;
 }

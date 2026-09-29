@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:shared/shared.dart';
 import 'command_executor.dart';
+import 'companion_socket_server.dart';
 
 class PairingCodeGenerator {
   static String generateCode() {
@@ -40,9 +41,16 @@ class TvCompanionService extends ChangeNotifier {
   ConnectedPhoneDevice? get connectedPhone => _connectedPhone;
   List<String> get commandHistoryLogs => List.unmodifiable(_commandHistoryLogs);
 
+  late final CompanionSocketServer socketServer;
+
+  TvCompanionService() {
+    socketServer = CompanionSocketServer(companionService: this);
+  }
+
   void startAdvertising() {
     currentPairingCode = PairingCodeGenerator.generateCode();
     _isAdvertising = true;
+    socketServer.startServer();
     notifyListeners();
   }
 

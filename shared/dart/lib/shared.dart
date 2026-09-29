@@ -62,6 +62,34 @@ enum DeviceStatus {
   UNSUPPORTED,
 }
 
+class PairingResponse {
+  final bool success;
+  final String? sessionToken;
+  final String? publicKey;
+  final String? error;
+
+  const PairingResponse({
+    required this.success,
+    this.sessionToken,
+    this.publicKey,
+    this.error,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'success': success,
+        'sessionToken': sessionToken,
+        'publicKey': publicKey,
+        'error': error,
+      };
+
+  factory PairingResponse.fromJson(Map<String, dynamic> json) => PairingResponse(
+        success: json['success'] ?? false,
+        sessionToken: json['sessionToken'],
+        publicKey: json['publicKey'],
+        error: json['error'],
+      );
+}
+
 class DeviceCapabilities {
   final bool power;
   final bool powerOn;
