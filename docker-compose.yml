@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: smart_tv_remote_db
+    restart: always
+    environment:
+      POSTGRES_USER: tvremote
+      POSTGRES_PASSWORD: tvremote_password_secret
+      POSTGRES_DB: smart_tv_remote_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: smart_tv_remote_backend
+    restart: always
+    ports:
+      - '3000:3000'
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://tvremote:tvremote_password_secret@postgres:5432/smart_tv_remote_db
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

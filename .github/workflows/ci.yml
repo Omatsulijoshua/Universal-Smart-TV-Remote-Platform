@@ -1,0 +1,71 @@
+name: Universal Smart TV Remote CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-shared-and-ts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build & Test Shared TS
+        run: |
+          cd shared/ts
+          npm install
+          npm run build
+
+      - name: Build & Test Backend
+        run: |
+          cd backend
+          npm install
+          npm run build
+
+      - name: Build & Test Admin Dashboard
+        run: |
+          cd admin
+          npm install
+          npm run build
+          node dist/admin.test.js
+
+  test-flutter-mobile-and-tv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Analyze & Test Shared Dart
+        run: |
+          cd shared/dart
+          dart pub get
+          dart analyze
+
+      - name: Analyze & Test Flutter Mobile
+        run: |
+          cd mobile
+          flutter pub get
+          dart analyze
+
+      - name: Analyze & Test Flutter TV Companion
+        run: |
+          cd tv
+          flutter pub get
+          dart analyze
