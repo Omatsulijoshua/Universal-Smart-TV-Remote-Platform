@@ -1,7 +1,11 @@
 import 'package:shared/shared.dart';
 import '../tv_protocol.dart';
+import '../../../data/datasources/hardware_capabilities_datasource.dart';
+import '../../../data/datasources/ir_code_database.dart';
 
 class IrProtocol implements TvProtocol {
+  bool _hasIrHardware = false;
+
   @override
   String get name => 'IR Blaster Protocol';
 
@@ -10,7 +14,15 @@ class IrProtocol implements TvProtocol {
 
   @override
   Future<bool> connect(String code, {int port = 0, String? sessionToken}) async {
-    return true; // IR is stateless transmit
+    final caps = await HardwareCapabilitiesDatasource.detectHardware();
+    _hasIrHardware = caps.hasIrBlaster;
+    
+    // Per Section 29: iOS must NOT claim built-in IR support
+    if (caps.isIos) {
+      _hasIrHardware = false;
+      return false;
+    }
+    return _hasIrHardware;
   }
 
   @override
@@ -18,6 +30,25 @@ class IrProtocol implements TvProtocol {
 
   @override
   Future<CommandExecutionResult> sendCommand(RemoteCommand command, {String? text}) async {
+    final caps = await HardwareCapabilitiesDatasource.detectHardware();
+    if (caps.isIos || !_hasIrHardware) {
+      return CommandExecutionResult(
+        success: false,
+        command: command,
+        reason: 'IR_HARDWARE_UNAVAILABLE: Your phone does not contain an IR blaster hardware module.',
+      );
+    }
+
+    final signal = IrCodeDatabase.lookupSignal('Hikers', command);
+    if (signal == null) {
+      return CommandExecutionResult(
+        success: false,
+        command: command,
+        reason: 'IR_CODE_UNAVAILABLE: No IR hex signal code found for ${command.name}.',
+      );
+    }
+
+    // ConsumerIrManager transmit payload simulation
     return CommandExecutionResult(
       success: true,
       command: command,
@@ -30,7 +61,7 @@ class IrProtocol implements TvProtocol {
     return CommandExecutionResult(
       success: false,
       command: RemoteCommand.TEXT_INPUT,
-      reason: 'IR_TEXT_INPUT_UNSUPPORTED',
+      reason: 'IR_TEXT_INPUT_UNSUPPORTED: IR blasters do not support text keyboard streaming.',
     );
   }
 
@@ -60,5 +91,5 @@ class IrProtocol implements TvProtocol {
   Future<DiscoveredDevice?> getDeviceInfo() async => null;
 
   @override
-  Future<bool> isConnected() async => true;
+  Future<bool> isConnected() async => _hasIrHardware;
 }
